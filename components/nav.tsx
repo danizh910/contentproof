@@ -8,9 +8,25 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-export function Nav() {
-  const pathname = usePathname()
+// Clerk hooks only work inside ClerkProvider.
+// This component is conditionally rendered — only mounted when clerkEnabled=true,
+// which is exactly when ClerkProvider is present in the tree (see layout.tsx).
+function ClerkAuthButtons({ mobile }: { mobile?: boolean }) {
   const { isSignedIn } = useAuth()
+  const cls = mobile ? 'w-full' : ''
+  return isSignedIn ? (
+    <SignOutButton>
+      <Button variant="outline" size="sm" className={cls}>Sign out</Button>
+    </SignOutButton>
+  ) : (
+    <SignInButton mode="modal">
+      <Button size="sm" className={cls}>Sign in</Button>
+    </SignInButton>
+  )
+}
+
+export function Nav({ clerkEnabled }: { clerkEnabled: boolean }) {
+  const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const links = [
@@ -42,14 +58,10 @@ export function Nav() {
               {link.label}
             </Link>
           ))}
-          {isSignedIn ? (
-            <SignOutButton>
-              <Button variant="outline" size="sm">Sign out</Button>
-            </SignOutButton>
+          {clerkEnabled ? (
+            <ClerkAuthButtons />
           ) : (
-            <SignInButton mode="modal">
-              <Button size="sm">Sign in</Button>
-            </SignInButton>
+            <Link href="/auth"><Button size="sm">Sign in</Button></Link>
           )}
         </div>
 
@@ -77,14 +89,12 @@ export function Nav() {
                 {link.label}
               </Link>
             ))}
-            {isSignedIn ? (
-              <SignOutButton>
-                <Button variant="outline" size="sm" className="w-full">Sign out</Button>
-              </SignOutButton>
+            {clerkEnabled ? (
+              <ClerkAuthButtons mobile />
             ) : (
-              <SignInButton mode="modal">
+              <Link href="/auth" onClick={() => setMobileOpen(false)}>
                 <Button size="sm" className="w-full">Sign in</Button>
-              </SignInButton>
+              </Link>
             )}
           </div>
         </div>

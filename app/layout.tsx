@@ -25,16 +25,22 @@ export const metadata: Metadata = {
   },
 }
 
+// NEXT_PUBLIC_ vars are embedded at build time — check once at module level
+const CLERK_ENABLED = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <ClerkProvider>
-      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-        <body className="min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 antialiased">
-          <Nav />
-          <main>{children}</main>
-          <Toaster richColors position="top-right" />
-        </body>
-      </html>
-    </ClerkProvider>
+  const html = (
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 antialiased">
+        <Nav clerkEnabled={CLERK_ENABLED} />
+        <main>{children}</main>
+        <Toaster richColors position="top-right" />
+      </body>
+    </html>
   )
+
+  // Only wrap with ClerkProvider if the publishable key is present —
+  // without it ClerkProvider throws and crashes every page at runtime.
+  if (!CLERK_ENABLED) return html
+  return <ClerkProvider>{html}</ClerkProvider>
 }
