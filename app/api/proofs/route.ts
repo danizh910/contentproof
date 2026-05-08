@@ -1,13 +1,13 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/neon'
+import { getDb } from '@/lib/neon'
 import { Proof } from '@/lib/types'
 
 export async function GET() {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const rows = await sql`
+  const rows = await getDb()`
     SELECT * FROM proofs
     WHERE clerk_user_id = ${userId}
     ORDER BY registered_at DESC
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const rows = await sql`
+    const rows = await getDb()`
       INSERT INTO proofs (clerk_user_id, user_email, user_name, file_name, file_size, file_type, sha256_hash, title, description, tags, is_public)
       VALUES (
         ${userId},

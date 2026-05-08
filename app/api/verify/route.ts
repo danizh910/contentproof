@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/neon'
+import { getDb } from '@/lib/neon'
 import { Proof, VerifyResult } from '@/lib/types'
 
 export async function POST(req: NextRequest) {
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid hash' }, { status: 400 })
   }
 
-  const rows = await sql`
+  const rows = await getDb()`
     SELECT * FROM proofs
     WHERE sha256_hash = ${hash} AND is_public = true
     LIMIT 1
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   const proof = rows[0] as Proof | undefined
   const result: VerifyResult['status'] = proof ? 'match' : 'not_found'
 
-  await sql`
+  await getDb()`
     INSERT INTO verifications (proof_id, submitted_hash, result)
     VALUES (${proof?.id ?? null}, ${hash}, ${result})
   `
