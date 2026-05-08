@@ -1,9 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useAuth } from '@clerk/nextjs'
-import { SignInButton } from '@clerk/nextjs'
-import { Plus, FileText, ShieldCheck } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Plus, FileText } from 'lucide-react'
 import { FileHasher } from '@/components/file-hasher'
 import { ProofCard } from '@/components/proof-card'
 import { Button } from '@/components/ui/button'
@@ -17,34 +15,17 @@ import { formatFileSize } from '@/lib/hash'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
-export default function DashboardPage() {
-  const { isSignedIn, isLoaded } = useAuth()
-
-  if (!isLoaded) return <DashboardSkeleton />
-
-  if (!isSignedIn) {
-    return (
-      <div className="mx-auto flex max-w-sm flex-col items-center gap-6 px-6 py-32 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-          <ShieldCheck className="h-7 w-7 text-zinc-600 dark:text-zinc-400" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Sign in to continue</h1>
-          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-            You need to be signed in to register and manage your proofs.
-          </p>
-        </div>
-        <SignInButton mode="modal">
-          <Button size="lg" className="w-full">Sign in</Button>
-        </SignInButton>
-      </div>
-    )
+function getOrCreateSessionId(): string {
+  let id = localStorage.getItem('cp_session')
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem('cp_session', id)
   }
-
-  return <DashboardContent />
+  return id
 }
 
-function DashboardContent() {
+export default function DashboardPage() {
+  const [sessionId, setSessionId] = useState<string | null>(null)
   const [proofs, setProofs] = useState<Proof[]>([])
   const [loadingProofs, setLoadingProofs] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -55,14 +36,15 @@ function DashboardContent() {
   const [isPublic, setIsPublic] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
+  // Init session on client only (localStorage is not available on server)
   useEffect(() => {
-    fetchProofs()
+    setSessionId(getOrCreateSessionId())
   }, [])
 
-  const fetchProofs = async () => {
+  const fetchProofs = useCallback(async (sid: string) => {
     setLoadingProofs(true)
     try {
-      const res = await fetch('/api/proofs')
+      const res = await fetch(`/api/proofs?session=${sid}`)
       const data = await res.json()
       setProofs(data.proofs ?? [])
     } catch {
@@ -70,7 +52,11 @@ function DashboardContent() {
     } finally {
       setLoadingProofs(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (sessionId) fetchProofs(sessionId)
+  }, [sessionId, fetchProofs])
 
   const handleHash = (hr: HashResult) => {
     setHashResult(hr)
@@ -88,13 +74,14 @@ function DashboardContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!hashResult) return
+    if (!hashResult || !sessionId) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/proofs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          session_id: sessionId,
           file_name: hashResult.fileName,
           file_size: hashResult.fileSize,
           file_type: hashResult.fileType,
@@ -123,11 +110,15 @@ function DashboardContent() {
 
   const totalSize = proofs.reduce((sum, p) => sum + p.file_size, 0)
 
+  if (!sessionId) return <DashboardSkeleton />
+
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">My Proofs</h1>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          Proofs are linked to this browser. Accounts &amp; sync coming soon.
+        </p>
       </div>
 
       {/* Stats */}
@@ -144,7 +135,7 @@ function DashboardContent() {
         ))}
       </div>
 
-      {/* Upload section */}
+      {/* Upload */}
       <div className="mb-10 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
         <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-50">Register a new file</h2>
         <FileHasher onHash={handleHash} onClear={handleClear} />
@@ -171,7 +162,6 @@ function DashboardContent() {
                 />
               </div>
             </div>
-
             <div className="space-y-1.5">
               <Label htmlFor="description">Description (optional)</Label>
               <Textarea
@@ -182,18 +172,12 @@ function DashboardContent() {
                 rows={3}
               />
             </div>
-
             <div className="flex items-center gap-3">
-              <Switch
-                id="public"
-                checked={isPublic}
-                onCheckedChange={setIsPublic}
-              />
+              <Switch id="public" checked={isPublic} onCheckedChange={setIsPublic} />
               <Label htmlFor="public" className="cursor-pointer">
                 Public — anyone with the link can verify this proof
               </Label>
             </div>
-
             <Button type="submit" disabled={submitting} className="gap-2">
               {submitting ? (
                 <>
@@ -214,31 +198,24 @@ function DashboardContent() {
       {/* Proof list */}
       <div>
         <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-50">Registered proofs</h2>
-
         {loadingProofs ? (
           <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-24 w-full rounded-lg" />
-            ))}
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-lg" />)}
           </div>
         ) : proofs.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-zinc-200 py-16 text-center dark:border-zinc-800">
-            <div className={cn(
-              'flex h-12 w-12 items-center justify-center rounded-full',
-              'bg-zinc-100 dark:bg-zinc-800'
-            )}>
+          <div className={cn(
+            'flex flex-col items-center gap-3 rounded-xl border border-dashed py-16 text-center',
+            'border-zinc-200 dark:border-zinc-800'
+          )}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
               <FileText className="h-6 w-6 text-zinc-400" />
             </div>
             <p className="font-medium text-zinc-700 dark:text-zinc-300">No proofs yet</p>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Register your first file using the form above.
-            </p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Register your first file using the form above.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {proofs.map(proof => (
-              <ProofCard key={proof.id} proof={proof} />
-            ))}
+            {proofs.map(proof => <ProofCard key={proof.id} proof={proof} />)}
           </div>
         )}
       </div>
@@ -249,15 +226,12 @@ function DashboardContent() {
 function DashboardSkeleton() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
-      <Skeleton className="mb-8 h-8 w-32" />
+      <Skeleton className="mb-2 h-8 w-32" />
+      <Skeleton className="mb-8 h-4 w-64" />
       <div className="mb-8 grid grid-cols-3 gap-4">
         {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-lg" />)}
       </div>
       <Skeleton className="mb-10 h-40 rounded-xl" />
-      <Skeleton className="h-6 w-40 mb-4" />
-      <div className="space-y-3">
-        {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-lg" />)}
-      </div>
     </div>
   )
 }

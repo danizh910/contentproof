@@ -1,40 +1,35 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/neon'
 import { Proof } from '@/lib/types'
 
-export async function GET() {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+// Session-based ownership — clerk_user_id column stores a browser-generated UUID.
+// When Clerk is added later, replace sessionId with auth().userId and run a migration.
+
+export async function GET(req: NextRequest) {
+  const sessionId = req.nextUrl.searchParams.get('session')
+  if (!sessionId) return NextResponse.json({ proofs: [] })
 
   const rows = await getDb()`
     SELECT * FROM proofs
-    WHERE clerk_user_id = ${userId}
+    WHERE clerk_user_id = ${sessionId}
     ORDER BY registered_at DESC
   `
   return NextResponse.json({ proofs: rows as Proof[] })
 }
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const user = await currentUser()
   const body = await req.json()
+  const { session_id, file_name, file_size, file_type, sha256_hash, title, description, tags, is_public } = body
 
-  const { file_name, file_size, file_type, sha256_hash, title, description, tags, is_public } = body
-
-  if (!file_name || !file_size || !file_type || !sha256_hash) {
+  if (!session_id || !file_name || !file_size || !file_type || !sha256_hash) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
   try {
     const rows = await getDb()`
-      INSERT INTO proofs (clerk_user_id, user_email, user_name, file_name, file_size, file_type, sha256_hash, title, description, tags, is_public)
+      INSERT INTO proofs (clerk_user_id, file_name, file_size, file_type, sha256_hash, title, description, tags, is_public)
       VALUES (
-        ${userId},
-        ${user?.emailAddresses[0]?.emailAddress ?? null},
-        ${user?.fullName ?? user?.username ?? null},
+        ${session_id},
         ${file_name},
         ${file_size},
         ${file_type},

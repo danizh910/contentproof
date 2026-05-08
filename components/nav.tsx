@@ -2,30 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { SignInButton, SignOutButton, useAuth } from '@clerk/nextjs'
 import { ShieldCheck, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-// Clerk hooks only work inside ClerkProvider.
-// This component is conditionally rendered — only mounted when clerkEnabled=true,
-// which is exactly when ClerkProvider is present in the tree (see layout.tsx).
-function ClerkAuthButtons({ mobile }: { mobile?: boolean }) {
-  const { isSignedIn } = useAuth()
-  const cls = mobile ? 'w-full' : ''
-  return isSignedIn ? (
-    <SignOutButton>
-      <Button variant="outline" size="sm" className={cls}>Sign out</Button>
-    </SignOutButton>
-  ) : (
-    <SignInButton mode="modal">
-      <Button size="sm" className={cls}>Sign in</Button>
-    </SignInButton>
-  )
-}
-
-export function Nav({ clerkEnabled }: { clerkEnabled: boolean }) {
+export function Nav() {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -38,7 +20,7 @@ export function Nav({ clerkEnabled }: { clerkEnabled: boolean }) {
     <nav className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-zinc-50">
-          <ShieldCheck className="h-5 w-5 text-zinc-900 dark:text-zinc-50" />
+          <ShieldCheck className="h-5 w-5" />
           ContentProof
         </Link>
 
@@ -58,11 +40,9 @@ export function Nav({ clerkEnabled }: { clerkEnabled: boolean }) {
               {link.label}
             </Link>
           ))}
-          {clerkEnabled ? (
-            <ClerkAuthButtons />
-          ) : (
-            <Link href="/auth"><Button size="sm">Sign in</Button></Link>
-          )}
+          <Link href="/dashboard">
+            <Button size="sm">Get started</Button>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -89,13 +69,9 @@ export function Nav({ clerkEnabled }: { clerkEnabled: boolean }) {
                 {link.label}
               </Link>
             ))}
-            {clerkEnabled ? (
-              <ClerkAuthButtons mobile />
-            ) : (
-              <Link href="/auth" onClick={() => setMobileOpen(false)}>
-                <Button size="sm" className="w-full">Sign in</Button>
-              </Link>
-            )}
+            <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+              <Button size="sm" className="w-full">Get started</Button>
+            </Link>
           </div>
         </div>
       )}
