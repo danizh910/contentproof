@@ -6,18 +6,26 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="mx-auto w-full max-w-4xl px-6 pb-24 pt-20 text-center sm:pt-32">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+      <section className="relative mx-auto w-full max-w-5xl px-6 pb-28 pt-20 text-center sm:pt-36">
+        {/* Background glow */}
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute -top-32 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-gradient-to-b from-indigo-100/70 via-violet-50/40 to-transparent blur-3xl dark:from-indigo-900/25 dark:via-violet-950/10" />
+        </div>
+
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50 px-4 py-1.5 text-xs font-medium text-indigo-600 dark:border-indigo-900/50 dark:bg-indigo-950/60 dark:text-indigo-400">
           <Lock className="h-3 w-3" />
           SHA-256 · processed entirely in your browser · no uploads
         </div>
 
-        <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-6xl">
-          Verify digital files{' '}
-          <span className="text-zinc-400 dark:text-zinc-500">before you trust them.</span>
+        <h1 className="text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-7xl">
+          Verify digital files
+          <br className="hidden sm:block" />
+          <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 bg-clip-text text-transparent">
+            {' '}before you trust them.
+          </span>
         </h1>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-500 dark:text-zinc-400">
+        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-zinc-500 dark:text-zinc-400">
           Register your files, prove their integrity, detect any modification — in seconds.
           No account needed to verify.
         </p>
@@ -35,24 +43,45 @@ export default function LandingPage() {
             </Button>
           </Link>
         </div>
+
+        {/* Trust indicators */}
+        <div className="mt-14 flex flex-wrap items-center justify-center gap-6 text-xs text-zinc-400 dark:text-zinc-600">
+          {['SHA-256 cryptographic hashing', 'Zero uploads — 100% client-side', 'Permanent timestamp proof', 'Free to use'].map(item => (
+            <span key={item} className="flex items-center gap-1.5">
+              <span className="h-1 w-1 rounded-full bg-indigo-400 dark:bg-indigo-600" />
+              {item}
+            </span>
+          ))}
+        </div>
       </section>
 
       {/* Feature cards */}
-      <section className="border-t border-zinc-100 bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-950/50">
+      <section className="border-t border-zinc-100 bg-zinc-50/70 dark:border-zinc-900 dark:bg-zinc-950/50">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <div className="grid gap-8 sm:grid-cols-3">
+          <div className="mb-14 text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 mb-3">
+              Everything you need
+            </p>
+            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+              Built for trust, not complexity
+            </h2>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-3">
             <FeatureCard
-              icon={<ShieldCheck className="h-6 w-6" />}
+              icon={<ShieldCheck className="h-5 w-5 text-white" />}
+              iconBg="from-indigo-500 to-indigo-600"
               title="Register"
               description="Hash your file with SHA-256 and anchor it permanently in our database. Proof of existence, tied to a timestamp."
             />
             <FeatureCard
-              icon={<Search className="h-6 w-6" />}
+              icon={<Search className="h-5 w-5 text-white" />}
+              iconBg="from-violet-500 to-violet-600"
               title="Verify"
               description="Drop any file to instantly check if it matches a registered proof. Detect tampering down to a single changed byte."
             />
             <FeatureCard
-              icon={<Share2 className="h-6 w-6" />}
+              icon={<Share2 className="h-5 w-5 text-white" />}
+              iconBg="from-blue-500 to-blue-600"
               title="Share"
               description="Generate a public proof link anyone can open — no account needed. Works like a digital certificate."
             />
@@ -61,49 +90,63 @@ export default function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section className="mx-auto w-full max-w-4xl px-6 py-20">
-        <h2 className="text-center text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-12">
-          How it works
-        </h2>
-        <div className="grid gap-6 sm:grid-cols-3">
+      <section className="mx-auto w-full max-w-4xl px-6 py-24">
+        <div className="mb-16 text-center">
+          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 mb-3">
+            Simple by design
+          </p>
+          <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+            How it works
+          </h2>
+        </div>
+        <div className="grid gap-10 sm:grid-cols-3 sm:gap-4">
           {[
-            { step: '01', title: 'Drop your file', body: 'Your browser computes a SHA-256 fingerprint. The file never leaves your device.' },
-            { step: '02', title: 'Register the hash', body: 'We store the hash, filename, size, and a timestamp. Anyone can verify it later.' },
-            { step: '03', title: 'Share the proof', body: 'Copy a short link. Whoever has the original file can confirm it matches — instantly.' },
-          ].map(item => (
-            <div key={item.step} className="flex flex-col gap-2">
-              <span className="font-mono text-xs font-semibold text-zinc-400 dark:text-zinc-600">{item.step}</span>
-              <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">{item.title}</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">{item.body}</p>
+            { step: '1', title: 'Drop your file', body: 'Your browser computes a SHA-256 fingerprint. The file never leaves your device.' },
+            { step: '2', title: 'Register the hash', body: 'We store the hash, filename, size, and a timestamp. Anyone can verify it later.' },
+            { step: '3', title: 'Share the proof', body: 'Copy a short link. Whoever has the original file can confirm it matches — instantly.' },
+          ].map((item, i) => (
+            <div key={item.step} className="relative flex flex-col gap-4">
+              {i < 2 && (
+                <div className="absolute top-5 left-12 right-0 hidden h-px bg-gradient-to-r from-zinc-200 to-transparent dark:from-zinc-800 sm:block" />
+              )}
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white shadow-md shadow-indigo-500/20">
+                {item.step}
+              </div>
+              <div>
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 mb-1.5">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{item.body}</p>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA strip */}
-      <section className="border-t border-zinc-100 dark:border-zinc-900">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-6 py-20 text-center sm:flex-row sm:justify-between sm:text-left">
-          <div>
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-              Ready to protect your work?
-            </h2>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              Free for individuals. No credit card required.
-            </p>
+      <section className="px-6 pb-20">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-700">
+          <div className="relative px-8 py-12 text-center sm:py-14 sm:flex sm:items-center sm:justify-between sm:text-left">
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/5 blur-3xl" />
+              <div className="absolute -left-12 bottom-0 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
+            </div>
+            <div className="relative mb-6 sm:mb-0">
+              <h2 className="text-2xl font-bold text-white">Ready to protect your work?</h2>
+              <p className="mt-1.5 text-indigo-200 text-sm">Free for individuals. No credit card required.</p>
+            </div>
+            <Link href="/dashboard" className="relative shrink-0">
+              <Button size="lg" className="bg-white text-indigo-700 hover:bg-indigo-50 from-white to-white shadow-lg font-semibold border-0">
+                Get started free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
-          <Link href="/dashboard">
-            <Button size="lg" className="shrink-0">
-              Get started
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-100 py-6 dark:border-zinc-900">
+      <footer className="border-t border-zinc-100 py-8 dark:border-zinc-900">
         <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
-          © {new Date().getFullYear()} ContentProof. Hashing powered by the Web Crypto API.
+          © {new Date().getFullYear()} ContentProof · Hashing powered by the Web Crypto API
         </p>
       </footer>
     </div>
@@ -112,19 +155,21 @@ export default function LandingPage() {
 
 function FeatureCard({
   icon,
+  iconBg,
   title,
   description,
 }: {
   icon: React.ReactNode
+  iconBg: string
   title: string
   description: string
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-7 transition-all duration-200 hover:border-zinc-300 hover:shadow-lg hover:-translate-y-0.5 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:hover:shadow-zinc-900/50">
+      <div className={`mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${iconBg} shadow-sm`}>
         {icon}
       </div>
-      <h3 className="mb-2 font-semibold text-zinc-900 dark:text-zinc-50">{title}</h3>
+      <h3 className="mb-2.5 font-semibold text-zinc-900 dark:text-zinc-50">{title}</h3>
       <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{description}</p>
     </div>
   )
