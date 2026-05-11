@@ -1,57 +1,115 @@
 import Link from 'next/link'
-import { ArrowRight, ShieldCheck, Search, Share2, Lock } from 'lucide-react'
+import { ArrowRight, ShieldCheck, Search, Share2, Lock, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function LandingPage() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative mx-auto w-full max-w-5xl px-6 pb-28 pt-20 text-center sm:pt-36">
-        {/* Background glow */}
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-32 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-gradient-to-b from-indigo-100/70 via-violet-50/40 to-transparent blur-3xl dark:from-indigo-900/25 dark:via-violet-950/10" />
-        </div>
+      <section className="relative mx-auto w-full max-w-6xl px-6 pb-16 pt-20 sm:pt-28">
+        {/* Subtle ambient glow — positioned low so it doesn't wash out the headline */}
+        <div className="pointer-events-none absolute bottom-0 left-1/2 h-72 w-[700px] -translate-x-1/2 translate-y-1/2 rounded-full bg-gradient-to-r from-indigo-300/20 via-violet-300/20 to-indigo-300/20 blur-3xl dark:from-indigo-700/15 dark:via-violet-700/15 dark:to-indigo-700/15" />
 
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50 px-4 py-1.5 text-xs font-medium text-indigo-600 dark:border-indigo-900/50 dark:bg-indigo-950/60 dark:text-indigo-400">
-          <Lock className="h-3 w-3" />
-          SHA-256 · processed entirely in your browser · no uploads
-        </div>
+        {/* Top content */}
+        <div className="text-center">
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-medium text-indigo-600 dark:border-indigo-900/60 dark:bg-indigo-950/60 dark:text-indigo-400">
+            <Lock className="h-3 w-3" />
+            SHA-256 · processed entirely in your browser · no uploads
+          </div>
 
-        <h1 className="text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-7xl">
-          Verify digital files
-          <br className="hidden sm:block" />
-          <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 bg-clip-text text-transparent">
-            {' '}before you trust them.
-          </span>
-        </h1>
-
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-zinc-500 dark:text-zinc-400">
-          Register your files, prove their integrity, detect any modification — in seconds.
-          No account needed to verify.
-        </p>
-
-        <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <Link href="/dashboard">
-            <Button size="lg" className="gap-2 w-full sm:w-auto">
-              Register a file
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Link href="/verify">
-            <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              Verify a file
-            </Button>
-          </Link>
-        </div>
-
-        {/* Trust indicators */}
-        <div className="mt-14 flex flex-wrap items-center justify-center gap-6 text-xs text-zinc-400 dark:text-zinc-600">
-          {['SHA-256 cryptographic hashing', 'Zero uploads — 100% client-side', 'Permanent timestamp proof', 'Free to use'].map(item => (
-            <span key={item} className="flex items-center gap-1.5">
-              <span className="h-1 w-1 rounded-full bg-indigo-400 dark:bg-indigo-600" />
-              {item}
+          <h1 className="text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-7xl">
+            Verify digital files
+            <br />
+            <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 bg-clip-text text-transparent">
+              before you trust them.
             </span>
-          ))}
+          </h1>
+
+          <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-zinc-500 dark:text-zinc-400">
+            Register your files, prove their integrity, detect any modification — in seconds.
+            No account needed to verify.
+          </p>
+
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link href="/dashboard">
+              <Button size="lg" className="gap-2 w-full sm:w-auto">
+                Register a file
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/verify">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                Verify a file
+              </Button>
+            </Link>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-xs text-zinc-400 dark:text-zinc-600">
+            {['SHA-256 cryptographic hashing', 'Zero uploads — 100% client-side', 'Free to use'].map(item => (
+              <span key={item} className="flex items-center gap-1.5">
+                <span className="h-1 w-1 rounded-full bg-indigo-400 dark:bg-indigo-700" />
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Product mockup */}
+        <div className="relative mx-auto mt-14 max-w-3xl">
+          <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-indigo-500/10 to-violet-500/10 blur-2xl" />
+          <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl shadow-zinc-200/80 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-zinc-950/60">
+            {/* Browser chrome */}
+            <div className="flex items-center gap-2 border-b border-zinc-100 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="flex gap-1.5">
+                <div className="h-3 w-3 rounded-full bg-red-400/80" />
+                <div className="h-3 w-3 rounded-full bg-amber-400/80" />
+                <div className="h-3 w-3 rounded-full bg-emerald-400/80" />
+              </div>
+              <div className="mx-auto flex h-6 w-48 items-center justify-center rounded-md border border-zinc-200 bg-white px-3 text-xs text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500">
+                contentproof.app/verify
+              </div>
+            </div>
+
+            {/* App content preview */}
+            <div className="p-6 sm:p-8">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600">
+                  <ShieldCheck className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Verify a file</p>
+                  <p className="text-xs text-zinc-400">Drop a file to check its fingerprint</p>
+                </div>
+              </div>
+
+              {/* Verified result card */}
+              <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-white p-5 dark:border-emerald-900/60 dark:from-emerald-950/30 dark:to-zinc-950">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-emerald-900 dark:text-emerald-100">File matches a registered proof</p>
+                    <p className="text-sm text-emerald-700/80 dark:text-emerald-500 mt-0.5">This file is authentic and unmodified.</p>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-2.5 rounded-xl border border-white/70 bg-white/70 p-4 text-sm dark:border-zinc-800/70 dark:bg-zinc-950/70">
+                  <div className="flex justify-between">
+                    <span className="text-zinc-500">File</span>
+                    <span className="font-medium text-zinc-900 dark:text-zinc-50">contract_final_v3.pdf</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-500">Size</span>
+                    <span className="font-medium text-zinc-900 dark:text-zinc-50">2.4 MB</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-500">Registered</span>
+                    <span className="font-medium text-zinc-900 dark:text-zinc-50">May 11, 2026</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
